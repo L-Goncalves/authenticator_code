@@ -8,7 +8,6 @@ import styles from './otp.module.css';
 const Otp = () => {
   const router = useRouter();
   const { secret } = router.query; // Get the secret from the dynamic route parameter
-  document.title = `Online Authenticator`;
   const [token, setToken] = useState('');
   const [remainingTime, setRemainingTime] = useState(authenticator.timeRemaining());
   const [showCopiedMessage, setShowCopiedMessage] = useState<Boolean>(false);
