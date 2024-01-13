@@ -8,17 +8,17 @@ import styles from './otp.module.css';
 const Otp = () => {
   const router = useRouter();
   const { secret } = router.query; // Get the secret from the dynamic route parameter
-
   const [token, setToken] = useState('');
   const [remainingTime, setRemainingTime] = useState(authenticator.timeRemaining());
-
+  const [showCopiedMessage, setShowCopiedMessage] = useState<Boolean>(false);
   const generateToken = () => {
     try {
+   
       authenticator.options = { digits: 8 };
 
       const generatedToken = authenticator.generate(secret as string);
       const isValid = authenticator.check(generatedToken, secret as string);
-
+      
       if (isValid) {
         setToken(generatedToken);
         const newRemainingTime = authenticator.timeRemaining();
@@ -32,6 +32,16 @@ const Otp = () => {
     }
   };
 
+
+  const copyToClipboard = () => {
+    navigator.clipboard.writeText(token)
+    setShowCopiedMessage(true)
+
+    setTimeout(() => {
+      setShowCopiedMessage(false)
+    }, 2000);
+  };
+
   useEffect(() => {
     if (secret) {
       generateToken();
@@ -39,7 +49,8 @@ const Otp = () => {
       const tokenIntervalId = setInterval(generateToken, 30000);
       const timeIntervalId = setInterval(() => {
         setRemainingTime(authenticator.timeRemaining());
-      }, 1000);
+       
+      }, 500);
 
       return () => {
         clearInterval(tokenIntervalId);
@@ -52,11 +63,17 @@ const Otp = () => {
     <div className={styles.centeredContainer}>
       {secret ? (
         <>
-          <div>Battle.net Current Authenticator Code:</div>
-          <div id={styles.token}>{token}</div>
-          
+          <div>Your Current Authenticator Code:</div>
+          <div onClick={copyToClipboard} id={styles.token}>{token}</div>
+        
           <div>Remaining Time: {remainingTime} seconds</div>
+
+          <div className={showCopiedMessage ? `${styles.copiedMessage} ${styles.show}` : styles.copiedMessage}>
+            Code Copied
+          </div>
         </>
+
+        
       ) : (
         <div>Invalid secret</div>
       )}
